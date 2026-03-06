@@ -1,0 +1,90 @@
+{
+  "info": {
+    "name": "AI Learning Path API",
+    "description": "Learning path generator backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "planId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health",
+        "description": "Health check. Returns { ok: true }."
+      }
+    },
+    {
+      "name": "Plans",
+      "item": [
+        {
+          "name": "Create plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.id) pm.collectionVariables.set('planId', body.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interest\": \"Machine Learning\",\n  \"level\": \"Intermediate\",\n  \"weeklyHours\": 10,\n  \"durationMonths\": 6\n}"
+            },
+            "url": "{{baseUrl}}/plans",
+            "description": "Create a new plan. level: Beginner | Intermediate | Advanced. weeklyHours: 1-168. durationMonths: 3 | 6 | 12. Saves planId to collection variable for subsequent requests."
+          }
+        },
+        {
+          "name": "List plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/plans",
+            "description": "List all plans, newest first."
+          }
+        },
+        {
+          "name": "Get plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/plans/{{planId}}",
+            "description": "Get a single plan by ID. Set planId in collection variables or use value from Create plan."
+          }
+        },
+        {
+          "name": "Generate plan (AI)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/plans/{{planId}}/generate",
+            "description": "Generate the learning plan content via AI for the given plan. Requires GEMINI_API_KEY (and optionally SERPER_API_KEY) in .env."
+          }
+        },
+        {
+          "name": "Delete plan",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/plans/{{planId}}",
+            "description": "Delete a plan by ID. Returns 204 No Content on success."
+          }
+        }
+      ]
+    }
+  ]
+}
